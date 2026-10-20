@@ -19,12 +19,12 @@ window.SITE_CONFIG = {
      * draft  = pripraví požiadavku na skopírovanie alebo stiahnutie; nič neodošle.
      * mailto = po odoslaní formulára otvorí e-mailový program návštevníka.
      * server = odošle požiadavku na PHP endpoint cez api/contact.php (len hosting s PHP, nie GitHub Pages).
-     * web3forms = odošle požiadavku cez službu Web3Forms na e-mail zadaný pri získaní kľúča.
-     *             Bez platného accessKey sa formulár správa ako draft.
+     * formsubmit = odošle požiadavku cez službu FormSubmit.co (rovnako ako opravabytov.sk).
+     *              Pri prvom odoslaní príde na cieľovú schránku aktivačný e-mail, ktorý treba potvrdiť.
      */
-    mode: 'web3forms',
-    // Verejný prístupový kľúč z https://web3forms.com (nie je to heslo; e-mail sa z neho nedá zistiť).
-    accessKey: 'bbf95b11-dc66-4808-b31f-a6e0560667df',
+    mode: 'formsubmit',
+    // Cieľová schránka alebo náhodný alias z FormSubmit (alias e-mail na webe skryje).
+    formsubmit: 'peterkasperek.sk@gmail.com',
     endpoint: 'api/contact.php'
   },
   prices: {

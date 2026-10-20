@@ -248,12 +248,12 @@
     var downloadButton = $('#download-request');
     var latestRequest = '';
     var submitting = false;
-    var selectedMode = ['draft', 'mailto', 'server', 'web3forms'].indexOf(formConfig.mode) !== -1 ? formConfig.mode : 'draft';
+    var selectedMode = ['draft', 'mailto', 'server', 'formsubmit'].indexOf(formConfig.mode) !== -1 ? formConfig.mode : 'draft';
     if (selectedMode === 'mailto' && !emailIsValid(contactEmail)) selectedMode = 'draft';
-    // Web3Forms potrebuje prístupový kľúč (UUID); bez neho formulár nič nesľubuje a len pripraví text.
-    var web3formsKey = clean(formConfig.accessKey);
-    if (selectedMode === 'web3forms' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(web3formsKey)) selectedMode = 'draft';
-    var sendsOnline = selectedMode === 'server' || selectedMode === 'web3forms';
+    // FormSubmit potrebuje cieľovú schránku alebo jej alias; bez neho formulár nič nesľubuje a len pripraví text.
+    var formsubmitTarget = clean(formConfig.formsubmit);
+    if (selectedMode === 'formsubmit' && !/^[^\s/?#]+$/.test(formsubmitTarget)) selectedMode = 'draft';
+    var sendsOnline = selectedMode === 'server' || selectedMode === 'formsubmit';
     var submitText = sendsOnline ? 'Odoslať požiadavku' : selectedMode === 'mailto' ? 'Pokračovať do e-mailu' : 'Pripraviť požiadavku';
     if (submitLabel) submitLabel.textContent = submitText;
     setText('#form-mode-note', sendsOnline ? 'Požiadavku odošleme servisu. Kópiu si môžete uložiť.' : selectedMode === 'mailto' ? 'Po kontrole otvoríte požiadavku vo svojom e-mailovom programe.' : 'Formulár pripraví text vašej požiadavky. Zatiaľ ho neodosiela.');
@@ -370,20 +370,23 @@
       var controller;
       var timeout;
       try {
-        var useWeb3forms = selectedMode === 'web3forms';
-        var endpoint = new URL(useWeb3forms ? 'https://api.web3forms.com/submit' : clean(formConfig.endpoint) || 'api/contact.php', window.location.href);
-        if (!useWeb3forms && (!/^https?:$/.test(endpoint.protocol) || endpoint.origin !== window.location.origin)) {
+        var useFormsubmit = selectedMode === 'formsubmit';
+        var endpoint = new URL(useFormsubmit ? 'https://formsubmit.co/ajax/' + formsubmitTarget : clean(formConfig.endpoint) || 'api/contact.php', window.location.href);
+        if (!useFormsubmit && (!/^https?:$/.test(endpoint.protocol) || endpoint.origin !== window.location.origin)) {
           throw new Error('unavailable');
         }
-        // Prijímacia schránka je uložená len vo Web3Forms pod kľúčom, nie na tomto webe.
-        var payload = useWeb3forms ? {
-          access_key: web3formsKey,
-          subject: 'Požiadavka na servis — ' + (deviceNames[request.device] || 'počítač'),
-          from_name: clean(business.name) || 'Servis počítačov BA',
-          name: request.name,
-          email: request.email,
-          phone: request.phone || 'Neuvedený',
-          message: latestRequest
+        // Rovnaký formát ako na opravabytov.sk: FormSubmit z polí poskladá e-mail s tabuľkou.
+        var payload = useFormsubmit ? {
+          _subject: '[ServisPocitacovBA.sk] ' + (serviceNames[request.service] || 'Požiadavka') + ' - ' + request.name + ' (' + (deviceNames[request.device] || request.device) + ')',
+          _template: 'table',
+          _captcha: 'false',
+          _replyto: request.email,
+          'Meno a priezvisko': request.name,
+          'E-mail': request.email,
+          'Telefón': request.phone || 'Neuvedený',
+          'Zariadenie': deviceNames[request.device] || request.device,
+          'Služba': serviceNames[request.service] || request.service,
+          'Popis problému': request.problem
         } : request;
         setSubmitting(true);
         showStatus('Odosielame vašu požiadavku…', 'info');
@@ -391,14 +394,15 @@
         timeout = window.setTimeout(function () { controller.abort(); }, 20000);
         var response = await window.fetch(endpoint.href, {
           method: 'POST',
-          credentials: useWeb3forms ? 'omit' : 'same-origin',
+          credentials: useFormsubmit ? 'omit' : 'same-origin',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify(payload),
           signal: controller.signal
         });
         var responseData;
         try { responseData = await response.json(); } catch (parseError) { responseData = null; }
-        var accepted = responseData && (useWeb3forms ? responseData.success === true : responseData.ok === true);
+        // FormSubmit vracia success ako text "true"/"false" (napr. "false", kým nie je potvrdená aktivácia).
+        var accepted = responseData && (useFormsubmit ? String(responseData.success) === 'true' : responseData.ok === true);
         if (!response.ok || !accepted) {
           var rateLimited = response.status === 429 || (responseData && responseData.code === 'rate_limited');
           showStatus(rateLimited ? 'V krátkom čase bolo odoslaných viac požiadaviek. Skúste to neskôr. Text si zatiaľ môžete stiahnuť.' : 'Odoslanie sa nepodarilo potvrdiť. Vaše údaje zostali vo formulári; požiadavku si môžete skopírovať alebo stiahnuť.', 'error');
