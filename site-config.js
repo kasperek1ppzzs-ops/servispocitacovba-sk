@@ -6,13 +6,13 @@
 window.SITE_CONFIG = {
   business: {
     name: 'Servis počítačov BA',
-    phone: '',                         // Napríklad +421 9xx xxx xxx; prázdny kontakt sa nezobrazí.
-    email: 'peterkasperek.sk@gmail.com', // Skutočná kontaktná e-mailová adresa.
-    address: 'Bratislava',             // Adresa prevádzky / lokalita pôsobenia.
-    hours: 'Po – Pia: 9:00 – 18:00',   // Otváracie hodiny.
-    companyName: '',                   // Obchodné meno prevádzkovateľa.
-    companyId: '',                     // IČO prevádzkovateľa.
-    companyAddress: ''                 // Sídlo prevádzkovateľa.
+    phone: '',                 // Napríklad +421 9xx xxx xxx; prázdny kontakt sa nezobrazí.
+    email: '',                 // Skutočná kontaktná e-mailová adresa (ponechané prázdne).
+    address: '',               // Adresa prevádzky (ponechané prázdne).
+    hours: '',                 // Otváracie hodiny (ponechané prázdne).
+    companyName: '',           // Obchodné meno prevádzkovateľa.
+    companyId: '',             // IČO prevádzkovateľa.
+    companyAddress: ''         // Sídlo prevádzkovateľa.
   },
   form: {
     /*
