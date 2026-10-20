@@ -1,6 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /NAVOD.md
 
 Sitemap: https://servispocitacovba.sk/sitemap.xml

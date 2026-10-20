@@ -1,0 +1,7 @@
+# Nastavenie pre GitHub Pages (Jekyll).
+# GitHub Pages nespúšťa PHP: bez tohto vylúčenia by bol api/config.php verejne stiahnuteľný
+# ako obyčajný text a interné návody by sa zverejnili ako samostatné stránky.
+exclude:
+  - api
+  - README.md
+  - NAVOD.md
