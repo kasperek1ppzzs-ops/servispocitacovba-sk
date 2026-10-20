@@ -24,7 +24,7 @@ window.SITE_CONFIG = {
      */
     mode: 'web3forms',
     // Verejný prístupový kľúč z https://web3forms.com (nie je to heslo; e-mail sa z neho nedá zistiť).
-    accessKey: '',
+    accessKey: 'bbf95b11-dc66-4808-b31f-a6e0560667df',
     endpoint: 'api/contact.php'
   },
   prices: {
