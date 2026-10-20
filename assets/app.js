@@ -248,11 +248,15 @@
     var downloadButton = $('#download-request');
     var latestRequest = '';
     var submitting = false;
-    var selectedMode = ['draft', 'mailto', 'server'].indexOf(formConfig.mode) !== -1 ? formConfig.mode : 'draft';
+    var selectedMode = ['draft', 'mailto', 'server', 'formsubmit'].indexOf(formConfig.mode) !== -1 ? formConfig.mode : 'draft';
     if (selectedMode === 'mailto' && !emailIsValid(contactEmail)) selectedMode = 'draft';
-    var submitText = selectedMode === 'server' ? 'Odoslať požiadavku' : selectedMode === 'mailto' ? 'Pokračovať do e-mailu' : 'Pripraviť požiadavku';
+    // FormSubmit potrebuje cieľovú schránku alebo jej alias; bez neho formulár nič nesľubuje a len pripraví text.
+    var formsubmitTarget = clean(formConfig.formsubmit);
+    if (selectedMode === 'formsubmit' && !/^[^\s/?#]+$/.test(formsubmitTarget)) selectedMode = 'draft';
+    var sendsOnline = selectedMode === 'server' || selectedMode === 'formsubmit';
+    var submitText = sendsOnline ? 'Odoslať požiadavku' : selectedMode === 'mailto' ? 'Pokračovať do e-mailu' : 'Pripraviť požiadavku';
     if (submitLabel) submitLabel.textContent = submitText;
-    setText('#form-mode-note', selectedMode === 'server' ? 'Požiadavku odošleme servisu. Kópiu si môžete uložiť.' : selectedMode === 'mailto' ? 'Po kontrole otvoríte požiadavku vo svojom e-mailovom programe.' : 'Formulár pripraví text vašej požiadavky. Zatiaľ ho neodosiela.');
+    setText('#form-mode-note', sendsOnline ? 'Požiadavku odošleme servisu. Kópiu si môžete uložiť.' : selectedMode === 'mailto' ? 'Po kontrole otvoríte požiadavku vo svojom e-mailovom programe.' : 'Formulár pripraví text vašej požiadavky. Zatiaľ ho neodosiela.');
 
     function showStatus(message, state) {
       if (!status) return;
@@ -349,7 +353,7 @@
       if (submitting) return;
       var request = readRequest();
       if (!validateRequest(request)) return;
-      showRequest(request, selectedMode !== 'server');
+      showRequest(request, !sendsOnline);
 
       if (selectedMode === 'draft') {
         showStatus('Požiadavka je pripravená. Zatiaľ nebola odoslaná.', 'info');
@@ -366,24 +370,40 @@
       var controller;
       var timeout;
       try {
-        var endpoint = new URL(clean(formConfig.endpoint) || 'api/contact.php', window.location.href);
-        if (!/^https?:$/.test(endpoint.protocol) || endpoint.origin !== window.location.origin) {
+        var useFormsubmit = selectedMode === 'formsubmit';
+        var endpoint = new URL(useFormsubmit ? 'https://formsubmit.co/ajax/' + formsubmitTarget : clean(formConfig.endpoint) || 'api/contact.php', window.location.href);
+        if (!useFormsubmit && (!/^https?:$/.test(endpoint.protocol) || endpoint.origin !== window.location.origin)) {
           throw new Error('unavailable');
         }
+        // Rovnaký formát ako na opravabytov.sk: FormSubmit z polí poskladá e-mail s tabuľkou.
+        var payload = useFormsubmit ? {
+          _subject: '[ServisPocitacovBA.sk] ' + (serviceNames[request.service] || 'Požiadavka') + ' - ' + request.name + ' (' + (deviceNames[request.device] || request.device) + ')',
+          _template: 'table',
+          _captcha: 'false',
+          _replyto: request.email,
+          'Meno a priezvisko': request.name,
+          'E-mail': request.email,
+          'Telefón': request.phone || 'Neuvedený',
+          'Zariadenie': deviceNames[request.device] || request.device,
+          'Služba': serviceNames[request.service] || request.service,
+          'Popis problému': request.problem
+        } : request;
         setSubmitting(true);
         showStatus('Odosielame vašu požiadavku…', 'info');
         controller = new AbortController();
         timeout = window.setTimeout(function () { controller.abort(); }, 20000);
         var response = await window.fetch(endpoint.href, {
           method: 'POST',
-          credentials: 'same-origin',
+          credentials: useFormsubmit ? 'omit' : 'same-origin',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(request),
+          body: JSON.stringify(payload),
           signal: controller.signal
         });
         var responseData;
         try { responseData = await response.json(); } catch (parseError) { responseData = null; }
-        if (!response.ok || !responseData || responseData.ok !== true) {
+        // FormSubmit vracia success ako text "true"/"false" (napr. "false", kým nie je potvrdená aktivácia).
+        var accepted = responseData && (useFormsubmit ? String(responseData.success) === 'true' : responseData.ok === true);
+        if (!response.ok || !accepted) {
           var rateLimited = response.status === 429 || (responseData && responseData.code === 'rate_limited');
           showStatus(rateLimited ? 'V krátkom čase bolo odoslaných viac požiadaviek. Skúste to neskôr. Text si zatiaľ môžete stiahnuť.' : 'Odoslanie sa nepodarilo potvrdiť. Vaše údaje zostali vo formulári; požiadavku si môžete skopírovať alebo stiahnuť.', 'error');
           if (resultTitle) resultTitle.focus({ preventScroll: false });

@@ -26,7 +26,8 @@ Hlavné verejné nastavenia sú v **`site-config.js`**. Uprav existujúce hodnot
 | `business.companyName` | Obchodné meno prevádzkovateľa. |
 | `business.companyId` | IČO, ak sa na prevádzkovateľa vzťahuje. |
 | `business.companyAddress` | Adresa prevádzkovateľa. |
-| `form.mode` | `draft`, `mailto` alebo `server`; vysvetlené nižšie. |
+| `form.mode` | `draft`, `mailto`, `formsubmit` alebo `server`; vysvetlené nižšie. |
+| `form.formsubmit` | Cieľová schránka alebo alias FormSubmit pre režim `formsubmit`. |
 | `form.endpoint` | Pri priloženom PHP odosielaní `api/contact.php`. |
 
 V časti `prices` doplň ceny len vtedy, keď máš skutočný cenník. Hodnota `null` znamená, že pevná suma nie je uvedená a zobrazí sa „Cena po diagnostike“. Ponuku služieb, postup, FAQ a informácie o súkromí prispôsob tomu, čo bude servis reálne poskytovať. Grafika rozloženého notebooku je ilustračný vizuál, nie fotografia skutočnej opravy ani konkrétneho servisovaného modelu.
@@ -45,6 +46,16 @@ Formulár pripraví požiadavku a umožní stiahnuť jej text. **Nič sa neodosi
 2. Zmeň `form.mode` na `mailto`.
 
 Web otvorí predvyplnenú správu v e-mailovom programe návštevníka. Návštevník ju musí odoslať sám. Bez nastaveného e-mailového programu nemusí otvorenie fungovať; stiahnutie požiadavky zostáva záložnou možnosťou. Otvorenie programu nepotvrdzuje doručenie správy.
+
+### Režim `formsubmit` — odoslanie bez vlastného servera (vhodné pre GitHub Pages)
+
+GitHub Pages nespúšťa PHP, preto tam režim `server` nefunguje. Režim `formsubmit` posiela požiadavky cez bezplatnú službu FormSubmit.co (rovnako ako opravabytov.sk):
+
+1. V `site-config.js` nastav `form.mode` na `formsubmit` a do `form.formsubmit` zadaj cieľovú e-mailovú schránku.
+2. Odošli prvú testovaciu požiadavku z webu. FormSubmit pošle na schránku aktivačný e-mail; potvrď ho tlačidlom v e-maile.
+3. Odošli ďalšiu testovaciu požiadavku a skontroluj schránku aj priečinok spam.
+
+E-mail v `form.formsubmit` je viditeľný v zdrojovom kóde webu. Ak ho chceš skryť, nahraď ho náhodným aliasom, ktorý FormSubmit ponúka po aktivácii. Údaje z formulára spracúva FormSubmit ako ďalší príjemca, uveď to v informáciách o spracovaní osobných údajov.
 
 ### Režim `server` — odoslanie cez PHP hosting
 
@@ -144,7 +155,6 @@ Web je dodaný ako súbory na stiahnutie. Samotné rozbalenie neprepája doménu
 ## 8. Súbory a použité vizuály
 
 - `index.html` — hlavná stránka.
-- `ochrana-sukromia.html` — pracovná verzia informácií o súkromí na doplnenie podľa prevádzky.
 - `site-config.js` — kontaktné údaje, režim formulára a ceny.
 - `assets/style.css`, `assets/app.js`, `assets/motion.js` — vzhľad, ovládanie a pohyb.
 - `assets/laptop-exploded.webp` — ilustračný vizuál vytvorený pre návrh stránky.

@@ -18,9 +18,13 @@ window.SITE_CONFIG = {
     /*
      * draft  = pripraví požiadavku na skopírovanie alebo stiahnutie; nič neodošle.
      * mailto = po odoslaní formulára otvorí e-mailový program návštevníka.
-     * server = odošle požiadavku na PHP endpoint cez api/contact.php.
+     * server = odošle požiadavku na PHP endpoint cez api/contact.php (len hosting s PHP, nie GitHub Pages).
+     * formsubmit = odošle požiadavku cez službu FormSubmit.co (rovnako ako opravabytov.sk).
+     *              Pri prvom odoslaní príde na cieľovú schránku aktivačný e-mail, ktorý treba potvrdiť.
      */
-    mode: 'server',
+    mode: 'formsubmit',
+    // Cieľová schránka alebo náhodný alias z FormSubmit (alias e-mail na webe skryje).
+    formsubmit: 'peterkasperek.sk@gmail.com',
     endpoint: 'api/contact.php'
   },
   prices: {

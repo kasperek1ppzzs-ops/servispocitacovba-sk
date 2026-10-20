@@ -38,17 +38,23 @@ Vytvorený v grafitovo-oranžovom redakčnom/švajčiarskom štýle s priestorov
 │   └── contact.php           # Zabezpečený endpoint pre odosielanie požiadaviek
 ├── assets/
 │   ├── app.js                # Obsluha diagnostiky, formulára a rozhrania
+│   ├── apple-touch-icon.png  # Ikona pre iOS / záložky (180×180)
 │   ├── favicon.svg           # Vektorová favicona
 │   ├── FONT-LICENSE.txt      # Licencia k písmu Manrope (SIL OFL)
 │   ├── laptop-exploded.webp  # High-res grafický asset notebooku
-│   ├── manrope-variable.ttf  # Lokálny variabilný font Manrope
+│   ├── manrope-variable.woff2 # Lokálny variabilný font Manrope (WOFF2, primárny)
+│   ├── manrope-variable.ttf  # Ten istý font vo formáte TTF (záloha)
 │   ├── motion.js             # 3D tilt a kinematika rozloženého notebooku
+│   ├── og-image.jpg          # Náhľad pri zdieľaní na sociálnych sieťach (1200×630)
 │   └── style.css             # Kompletný responzívny stylesheet
+├── 404.html                  # Vlastná stránka „nenašlo sa“ (noindex)
+├── _config.yml               # GitHub Pages: nezverejňuje api/, README.md a NAVOD.md
 ├── CNAME                     # servispocitacovba.sk
 ├── index.html                # Hlavná prezentačná stránka
 ├── NAVOD.md                  # Detailný návod na nasadenie a konfiguráciu hostingu
 ├── README.md                 # Dokumentácia projektu
 ├── robots.txt                # Inštrukcie pre vyhľadávače
+├── sitemap.xml               # Mapa stránok pre Google Search Console
 └── site-config.js            # Verejné nastavenia kontaktov a cien
 ```
 
@@ -62,7 +68,7 @@ window.SITE_CONFIG = {
   business: {
     name: 'Servis počítačov BA',
     phone: '+421 9xx xxx xxx',
-    email: 'peterkasperek.sk@gmail.com',
+    email: 'info@vasa-domena.sk',
     address: 'Bratislava',
     hours: 'Po – Pia: 9:00 – 18:00',
     // ...
