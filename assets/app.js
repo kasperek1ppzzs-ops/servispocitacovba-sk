@@ -248,11 +248,15 @@
     var downloadButton = $('#download-request');
     var latestRequest = '';
     var submitting = false;
-    var selectedMode = ['draft', 'mailto', 'server'].indexOf(formConfig.mode) !== -1 ? formConfig.mode : 'draft';
+    var selectedMode = ['draft', 'mailto', 'server', 'web3forms'].indexOf(formConfig.mode) !== -1 ? formConfig.mode : 'draft';
     if (selectedMode === 'mailto' && !emailIsValid(contactEmail)) selectedMode = 'draft';
-    var submitText = selectedMode === 'server' ? 'Odoslať požiadavku' : selectedMode === 'mailto' ? 'Pokračovať do e-mailu' : 'Pripraviť požiadavku';
+    // Web3Forms potrebuje prístupový kľúč (UUID); bez neho formulár nič nesľubuje a len pripraví text.
+    var web3formsKey = clean(formConfig.accessKey);
+    if (selectedMode === 'web3forms' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(web3formsKey)) selectedMode = 'draft';
+    var sendsOnline = selectedMode === 'server' || selectedMode === 'web3forms';
+    var submitText = sendsOnline ? 'Odoslať požiadavku' : selectedMode === 'mailto' ? 'Pokračovať do e-mailu' : 'Pripraviť požiadavku';
     if (submitLabel) submitLabel.textContent = submitText;
-    setText('#form-mode-note', selectedMode === 'server' ? 'Požiadavku odošleme servisu. Kópiu si môžete uložiť.' : selectedMode === 'mailto' ? 'Po kontrole otvoríte požiadavku vo svojom e-mailovom programe.' : 'Formulár pripraví text vašej požiadavky. Zatiaľ ho neodosiela.');
+    setText('#form-mode-note', sendsOnline ? 'Požiadavku odošleme servisu. Kópiu si môžete uložiť.' : selectedMode === 'mailto' ? 'Po kontrole otvoríte požiadavku vo svojom e-mailovom programe.' : 'Formulár pripraví text vašej požiadavky. Zatiaľ ho neodosiela.');
 
     function showStatus(message, state) {
       if (!status) return;
@@ -349,7 +353,7 @@
       if (submitting) return;
       var request = readRequest();
       if (!validateRequest(request)) return;
-      showRequest(request, selectedMode !== 'server');
+      showRequest(request, !sendsOnline);
 
       if (selectedMode === 'draft') {
         showStatus('Požiadavka je pripravená. Zatiaľ nebola odoslaná.', 'info');
@@ -366,24 +370,36 @@
       var controller;
       var timeout;
       try {
-        var endpoint = new URL(clean(formConfig.endpoint) || 'api/contact.php', window.location.href);
-        if (!/^https?:$/.test(endpoint.protocol) || endpoint.origin !== window.location.origin) {
+        var useWeb3forms = selectedMode === 'web3forms';
+        var endpoint = new URL(useWeb3forms ? 'https://api.web3forms.com/submit' : clean(formConfig.endpoint) || 'api/contact.php', window.location.href);
+        if (!useWeb3forms && (!/^https?:$/.test(endpoint.protocol) || endpoint.origin !== window.location.origin)) {
           throw new Error('unavailable');
         }
+        // Prijímacia schránka je uložená len vo Web3Forms pod kľúčom, nie na tomto webe.
+        var payload = useWeb3forms ? {
+          access_key: web3formsKey,
+          subject: 'Požiadavka na servis — ' + (deviceNames[request.device] || 'počítač'),
+          from_name: clean(business.name) || 'Servis počítačov BA',
+          name: request.name,
+          email: request.email,
+          phone: request.phone || 'Neuvedený',
+          message: latestRequest
+        } : request;
         setSubmitting(true);
         showStatus('Odosielame vašu požiadavku…', 'info');
         controller = new AbortController();
         timeout = window.setTimeout(function () { controller.abort(); }, 20000);
         var response = await window.fetch(endpoint.href, {
           method: 'POST',
-          credentials: 'same-origin',
+          credentials: useWeb3forms ? 'omit' : 'same-origin',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(request),
+          body: JSON.stringify(payload),
           signal: controller.signal
         });
         var responseData;
         try { responseData = await response.json(); } catch (parseError) { responseData = null; }
-        if (!response.ok || !responseData || responseData.ok !== true) {
+        var accepted = responseData && (useWeb3forms ? responseData.success === true : responseData.ok === true);
+        if (!response.ok || !accepted) {
           var rateLimited = response.status === 429 || (responseData && responseData.code === 'rate_limited');
           showStatus(rateLimited ? 'V krátkom čase bolo odoslaných viac požiadaviek. Skúste to neskôr. Text si zatiaľ môžete stiahnuť.' : 'Odoslanie sa nepodarilo potvrdiť. Vaše údaje zostali vo formulári; požiadavku si môžete skopírovať alebo stiahnuť.', 'error');
           if (resultTitle) resultTitle.focus({ preventScroll: false });

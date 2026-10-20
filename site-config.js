@@ -18,9 +18,13 @@ window.SITE_CONFIG = {
     /*
      * draft  = pripraví požiadavku na skopírovanie alebo stiahnutie; nič neodošle.
      * mailto = po odoslaní formulára otvorí e-mailový program návštevníka.
-     * server = odošle požiadavku na PHP endpoint cez api/contact.php.
+     * server = odošle požiadavku na PHP endpoint cez api/contact.php (len hosting s PHP, nie GitHub Pages).
+     * web3forms = odošle požiadavku cez službu Web3Forms na e-mail zadaný pri získaní kľúča.
+     *             Bez platného accessKey sa formulár správa ako draft.
      */
-    mode: 'server',
+    mode: 'web3forms',
+    // Verejný prístupový kľúč z https://web3forms.com (nie je to heslo; e-mail sa z neho nedá zistiť).
+    accessKey: '',
     endpoint: 'api/contact.php'
   },
   prices: {
