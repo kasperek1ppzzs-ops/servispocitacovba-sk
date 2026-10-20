@@ -25,7 +25,6 @@ Vytvorený v grafitovo-oranžovom redakčnom/švajčiarskom štýle s priestorov
 4. **Čistá architektúra s nulovými závislosťami:**
    - 100% čistý Vanilla JavaScript a moderné CSS. Žiadny npm build, žiadny Node.js runtime, okamžité načítanie.
    - Lokálne vstavaný variabilný font Manrope (nezávislý na externých CDNs).
-   - Kompletná stránka ochrany osobných údajov (`ochrana-sukromia.html`).
    - Verejná konfigurácia oddelená v `site-config.js`.
 
 ---
@@ -48,7 +47,6 @@ Vytvorený v grafitovo-oranžovom redakčnom/švajčiarskom štýle s priestorov
 ├── CNAME                     # servispocitacovba.sk
 ├── index.html                # Hlavná prezentačná stránka
 ├── NAVOD.md                  # Detailný návod na nasadenie a konfiguráciu hostingu
-├── ochrana-sukromia.html     # Zásady spracovania osobných údajov (GDPR)
 ├── README.md                 # Dokumentácia projektu
 ├── robots.txt                # Inštrukcie pre vyhľadávače
 └── site-config.js            # Verejné nastavenia kontaktov a cien
