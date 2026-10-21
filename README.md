@@ -51,6 +51,10 @@ Vytvorený v grafitovo-oranžovom redakčnom/švajčiarskom štýle s priestorov
 ├── _config.yml               # GitHub Pages: nezverejňuje api/, README.md a NAVOD.md
 ├── CNAME                     # servispocitacovba.sk
 ├── index.html                # Hlavná prezentačná stránka
+├── oprava-notebookov-a-pc-bratislava.html  # Podstránka služby: oprava a diagnostika
+├── zrychlenie-pocitaca-ssd-ram.html        # Podstránka služby: SSD a RAM
+├── cistenie-notebooku-prehrievanie.html    # Podstránka služby: čistenie a chladenie
+├── zaloha-a-obnova-dat.html                # Podstránka služby: dáta a systém
 ├── NAVOD.md                  # Detailný návod na nasadenie a konfiguráciu hostingu
 ├── README.md                 # Dokumentácia projektu
 ├── robots.txt                # Inštrukcie pre vyhľadávače
