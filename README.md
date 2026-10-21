@@ -42,6 +42,7 @@ Vytvorený v grafitovo-oranžovom redakčnom/švajčiarskom štýle s priestorov
 │   ├── favicon.svg           # Vektorová favicona
 │   ├── FONT-LICENSE.txt      # Licencia k písmu Manrope (SIL OFL)
 │   ├── laptop-exploded.webp  # High-res grafický asset notebooku
+│   ├── laptop-exploded-540w.webp / -720w.webp  # Menšie verzie pre mobily (srcset)
 │   ├── manrope-variable.woff2 # Lokálny variabilný font Manrope (WOFF2, primárny)
 │   ├── manrope-variable.ttf  # Ten istý font vo formáte TTF (záloha)
 │   ├── motion.js             # 3D tilt a kinematika rozloženého notebooku
